@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"os"
 	"testing"
 )
 
@@ -73,6 +74,26 @@ func TestDecodeConfigUnsupportedBrand(t *testing.T) {
 	_, err := DecodeConfig(bytes.NewReader(data))
 	if !errors.Is(err, ErrUnsupportedBrand) {
 		t.Fatalf("expected ErrUnsupportedBrand, got %v", err)
+	}
+}
+
+func TestDecodeConfigSampleHEIC(t *testing.T) {
+	f, err := os.Open("testdata/sample.heic")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	cfg, err := DecodeConfig(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if cfg.Width != 4284 || cfg.Height != 5712 {
+		t.Fatalf("unexpected sample dimensions: %dx%d", cfg.Width, cfg.Height)
+	}
+	if cfg.FrameCount != 1 || cfg.Format != FormatHEIC || cfg.MIME != "image/heic" || cfg.MainBrand != "heic" {
+		t.Fatalf("unexpected sample config: %+v", cfg)
 	}
 }
 

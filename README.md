@@ -136,8 +136,11 @@ check whether this package maps it to a normalized format.
 
 ```sh
 go install github.com/turtlemeow/heif-meta-parser/cmd/heifmeta@latest
-heifmeta image.heic
+heifmeta testdata/sample.heic
 ```
+
+The repository includes `testdata/sample.heic`, a metadata-stripped HEIC file
+that can be used with the CLI and tests.
 
 ## Scope
 

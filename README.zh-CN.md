@@ -129,8 +129,10 @@ type Image struct {
 
 ```sh
 go install github.com/turtlemeow/heif-meta-parser/cmd/heifmeta@latest
-heifmeta image.heic
+heifmeta testdata/sample.heic
 ```
+
+仓库内置了 `testdata/sample.heic`，这是一个已清理元信息的 HEIC 文件，可用于命令行工具和测试。
 
 ## 范围
 
