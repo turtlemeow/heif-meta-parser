@@ -139,8 +139,8 @@ go install github.com/turtlemeow/heif-meta-parser/cmd/heifmeta@latest
 heifmeta testdata/sample.heic
 ```
 
-The repository includes `testdata/sample.heic`, a metadata-stripped HEIC file
-that can be used with the CLI and tests.
+The repository includes `testdata/sample.heic`, a GPS-stripped HEIC file that
+can be used with the CLI and tests.
 
 ## Scope
 
