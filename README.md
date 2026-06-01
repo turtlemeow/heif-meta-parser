@@ -9,13 +9,32 @@ It parses enough ISO BMFF/HEIF structure to report the primary image dimensions,
 rotation-adjusted dimensions, frame count, major brand, compatible brands,
 format, and MIME type.
 
+## What It Parses
+
+The parser reads HEIF metadata from the BMFF box structure. It currently extracts:
+
+- File type metadata: major brand and compatible brands from `ftyp`
+- Primary image item: primary item ID from `pitm`
+- Image item records: item ID, item type, item name, and hidden flag from `iinf` / `infe`
+- Image dimensions: width and height from the `ispe` item property
+- Rotation metadata: quarter-turn rotation from the `irot` item property
+- Item-property links: property associations from `iprp` / `ipco` / `ipma`
+- Item references: thumbnail, auxiliary image, and mask relationships from `iref`
+- Top-level images: image items excluding hidden, thumbnail, auxiliary, and mask items
+
+The library does not parse or decode the compressed media payload in `mdat`.
+
 ## Install
 
 ```sh
 go get github.com/turtlemeow/heif-meta-parser
 ```
 
-## Usage
+## Core API
+
+### `DecodeConfig`
+
+Use `DecodeConfig` when you only need the common image configuration.
 
 ```go
 package main
@@ -44,7 +63,26 @@ func main() {
 }
 ```
 
-For detailed item metadata, use `Parse`:
+It returns:
+
+```go
+type Config struct {
+	Width            int
+	Height           int
+	FrameCount       int
+	Format           Format
+	MIME             string
+	MainBrand        string
+	CompatibleBrands []string
+}
+```
+
+`Width` and `Height` are adjusted with HEIF rotation metadata when an `irot`
+property is present.
+
+### `Parse`
+
+Use `Parse` when you need item-level metadata:
 
 ```go
 file, err := heifmeta.Parse(f)
@@ -58,6 +96,41 @@ for _, img := range file.Images {
 		img.ID, img.Primary, img.ItemType, w, h)
 }
 ```
+
+It returns:
+
+```go
+type File struct {
+	MainBrand        string
+	CompatibleBrands []string
+	Images           []Image
+	TopLevelImages   []Image
+	PrimaryImage     *Image
+}
+
+type Image struct {
+	ID        uint32
+	Width     uint32
+	Height    uint32
+	Rotation  Rotation
+	ItemType  string
+	Name      string
+	Primary   bool
+	Hidden    bool
+	Thumbnail bool
+	Auxiliary bool
+	Mask      bool
+}
+```
+
+`Images` contains all parsed image items. `TopLevelImages` excludes hidden,
+thumbnail, auxiliary, and mask items. `PrimaryImage` points to the item selected
+by the HEIF `pitm` box.
+
+### `IsSupportedBrand`
+
+Use `IsSupportedBrand` if you already have a HEIF major brand and only need to
+check whether this package maps it to a normalized format.
 
 ## CLI
 
